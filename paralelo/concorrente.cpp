@@ -5,35 +5,44 @@
 using namespace std;
 
 // Define o tamanho da matriz quadrada a ser preenchida
-#define TAM 1000
+#define TAM 15
 #define NTHREADS 6
 
 pthread_mutex_t mutex;
 
 // Cria a referência global para a vetor com os numeros primos
-int *vetor;
+int *vetor_primos;
 int indice = 0;
 
-void *isPrimo(void *aux) {
-    pthread_mutex_lock(&mutex);
+void *calcula_primo(void *aux) {
     int *num = (int *) aux;
-    printf("num primo: %d\n", *num);
-    int isPrimo = 1;
+    int is_primo = 1;
 
     for (int i = 2; i <= *num / 2; i++) {
         if (*num % i == 0) {
-            isPrimo = 0;
+            is_primo = 0;
             break;
         }
     }
-    printf(isPrimo ? "primo" : "não primo");
-    printf("\n");
+    pthread_mutex_lock(&mutex);
+    if (is_primo) {
+        vetor_primos[indice] = *num;
+        indice += 1;
+    }
     pthread_mutex_unlock(&mutex);
     return 0;
 }
 
+void print_vetor() {
+    printf("print vetor de primos primos\n");
+    for (int i = 0; i < indice; i++) {
+        printf("%d ", vetor_primos[i]);
+    }
+    printf("\n");
+}
+
 int main(int argc, char** argv) {
-    vetor = (int*) malloc(sizeof (int*) * TAM);
+    vetor_primos = (int*) malloc(sizeof (int*) * TAM);
 
     pthread_mutex_init(&mutex, NULL);
 
@@ -44,7 +53,7 @@ int main(int argc, char** argv) {
         num = (int *) malloc(sizeof (int));
         *num = i + 1;
 
-        if (pthread_create(&threads[i], NULL, isPrimo, (void *) num)) {
+        if (pthread_create(&threads[i], NULL, calcula_primo, (void *) num)) {
             printf("--ERRO at create thread id %d--\n", i);
             return -1;
         }
@@ -56,6 +65,6 @@ int main(int argc, char** argv) {
             return -1;
         }
     }
-
+    print_vetor();
     return 0;
 }
