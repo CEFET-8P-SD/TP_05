@@ -10,6 +10,8 @@ using namespace std;
 int *vetor_primos;
 // Define variável de índice para inserir no vetor
 int indice = 1;
+// Define gerador de numeros para teste
+int num = 3;
 
 // função que imprimi o vetor de primos
 void print_vetor() {
@@ -22,7 +24,7 @@ void print_vetor() {
 
 // função que determina se o número é primo e adiciona no
 // vetor de primos caso seja
-void verifica_primo(int num) {
+void verifica_primo() {
     int is_primo = 1;
     for (int i = 2; i <= sqrt(num); i++) {
         if (num % i == 0) {
@@ -38,12 +40,12 @@ void verifica_primo(int num) {
 
 // função que determina se o número é primo e adiciona no
 // vetor de primos
-void calcula_primo(int num) {
+void calcula_primo() {
     while(indice < TAM) {
         // o passo de incremento do gerador é 2 para não analisar número pares
         num += 2;
         // chama método para verificar numero primo
-        verifica_primo(num);
+        verifica_primo();
     }
 }
 
@@ -55,11 +57,8 @@ int main(int argc, char** argv) {
     // adicionado manual o único número par primo
     vetor_primos[0] = 2;
 
-    // Define gerador de numeros para teste
-    int cont = 3;
-
     // chamando método para gerar os números primos
-    calcula_primo(cont);
+    calcula_primo();
     // metodo para print do vetor de primos
     print_vetor();
 }
