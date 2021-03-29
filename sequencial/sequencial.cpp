@@ -1,11 +1,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include <time.h>
 
 using namespace std;
 
 // Define o tamanho da vetor de primos
-#define TAM 15
+#define TAM 100000000
+// Tempo de execucao em segundos
+#define TEMPO_EXECUCAO 0.01
 // Cria vetor para alocar os números primos
 int *vetor_primos;
 // Define variável de índice para inserir no vetor
@@ -41,12 +44,17 @@ void verifica_primo() {
 // função que determina se o número é primo e adiciona no
 // vetor de primos
 void calcula_primo() {
-    while(indice < TAM) {
-        // o passo de incremento do gerador é 2 para não analisar número pares
-        num += 2;
+    clock_t tempo;
+
+    tempo = clock();
+    while((clock() - tempo) * 1.0 / CLOCKS_PER_SEC <= TEMPO_EXECUCAO) {
         // chama método para verificar numero primo
         verifica_primo();
+        // o passo de incremento do gerador é 2 para não analisar número pares
+        num += 2;
     }
+    tempo = clock() - tempo;
+    printf("Tempo corrido %.5f s gerando %d numeros primos\n", tempo * 1.0 / CLOCKS_PER_SEC, indice);
 }
 
 // método main
@@ -60,6 +68,6 @@ int main(int argc, char** argv) {
     // chamando método para gerar os números primos
     calcula_primo();
     // metodo para print do vetor de primos
-    print_vetor();
+    // print_vetor();
 }
 
