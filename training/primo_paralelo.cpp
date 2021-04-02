@@ -6,8 +6,8 @@
 pthread_mutex_t mutex;
 
 //Variáveis globais para evitar parâmetros
-int index = 0;
 int* vetor_primos;
+int index = 0;
 
 void imprime_primos(int* vetor_primos, int numero_maximo)
 {
@@ -37,11 +37,11 @@ void *teste_primo(void *num){
     }
 
     pthread_mutex_lock(&mutex);
-    
+
     if (teste==1)
     {
         vetor_primos[index];
-        index+=1;
+        index++;
     }
     
     pthread_mutex_lock(&mutex);
@@ -66,8 +66,8 @@ int main(int argc, char const *argv[])
 
     for (int i = 0; i < NUMERO_THREADS; i++)
     {
-        if(pthread_create(&threads[i], NULL, teste_primo, (void *) *num)){
-            printf("ERROR!!! - Thread: %d.\n");
+        if(pthread_create(&threads[i], NULL, teste_primo, (void *) num)){
+            printf("ERROR!!! - Thread: %d.\n", i);
             return -1;
         }
 
