@@ -23,8 +23,18 @@ int main(int argc, char const *argv[])
     for (int i = 3; i <= 60; i++)
     {
 
+        int test = teste_primo(i);
+
         printf("Número: %d ---", i);
-        printf("Resultado do teste: %d.\n", teste_primo(i));
+
+        if (test == 0)
+        {
+            printf("Resultado do teste: Não Primo.\n");
+        }else{
+            printf("Resultado do teste: Primo.\n");
+        }
+        
+        
 
     }
     
