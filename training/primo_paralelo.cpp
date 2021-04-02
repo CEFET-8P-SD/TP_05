@@ -7,7 +7,7 @@ pthread_mutex_t mutex;
 
 //Variáveis globais para evitar parâmetros
 int* vetor_primos;
-int index = 0;
+int indexi = 0;
 
 void imprime_primos(int* vetor_primos, int numero_maximo)
 {
@@ -36,15 +36,13 @@ void *teste_primo(void *num){
 
     }
 
-    pthread_mutex_lock(&mutex);
-
     if (teste==1)
     {
-        vetor_primos[index];
-        index++;
+        pthread_mutex_lock(&mutex);
+        vetor_primos[indexi] = *numero;
+        indexi++;
+        pthread_mutex_unlock(&mutex);
     }
-    
-    pthread_mutex_lock(&mutex);
 
     return 0;
 }
@@ -55,7 +53,7 @@ int main(int argc, char const *argv[])
 {
 
     //Vetor de Primos
-    int numero_maximo = 500;
+    int numero_maximo = 5;
     vetor_primos = (int*) malloc(sizeof(int*) * numero_maximo);
 
     pthread_mutex_init(&mutex, NULL);
