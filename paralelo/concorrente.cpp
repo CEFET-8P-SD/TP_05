@@ -1,80 +1,135 @@
-#include <cstdlib>
-#include <iostream>
+// Bibliotecas utilizadas
 #include <pthread.h>
+#include <iostream>
+#include <time.h>
+#include <cmath>    
 
-using namespace std;
+//Variáveis globais
+pthread_mutex_t mutex;  // Variável que será usada para controlar a região crítica
 
-// Define o tamanho da vetor de primos
-#define TAM 15
-// Define a quantidade de threads a serem usadas
-#define NTHREADS 6
-// Define a variável para o controle da região crítica
-pthread_mutex_t mutex;
-// Cria vetor para alocar os números primos
-int *vetor_primos;
-// Define variável de índice para inserir no vetor
-int indice = 0;
+int *vetor_de_primos;   
 
-// função que determina se o número é primo e adiciona no
-// vetor de primos
-void *calcula_primo(void *aux) {
-    int *num = (int *) aux;
-    int is_primo = 1;
+float tempo_de_execucao = 5.0;  // Tempo permitido de execução
+int indice_atual_vetor = 0;     // Variável que controla o índice do vetor
+int numero = 1;                 // número a ser testado no momento atual
 
-    for (int i = 2; i <= *num / 2; i++) {
-        if (*num % i == 0) {
-            is_primo = 0;
+//Método usado para testes: Imprime o vetor de primos
+void imprime_primos()
+{
+    printf("%d", vetor_de_primos[0]);
+
+    for (int i = 1; i < indice_atual_vetor; i++)
+    {
+        printf("%d     ", vetor_de_primos[i]);
+    }
+
+}
+
+//Método que testa se um dado número é ou não primo
+void teste_primo(int num){
+    int counter = 0;
+    int teste = 1;
+
+    // Laço de repetição que testara se um número divide por todos os números até sua raiz quadrada
+    for (int i = 2; i < sqrt(num); i++)
+    {
+        
+        if (num % i == 0)
+        {
+            teste = 0;
             break;
         }
+
     }
-    pthread_mutex_lock(&mutex);
-    if (is_primo) {
-        vetor_primos[indice] = *num;
-        indice += 1;
+
+    // Se o teste de primos é positivo
+    if (teste==1)
+    {
+        // Inicia região crítica
+        pthread_mutex_lock(&mutex);
+        
+        //  Acrescenta um dado númeo ao veto de primos
+        vetor_de_primos[indice_atual_vetor] = num;
+        // Incrementa o índice do vetor
+        indice_atual_vetor++;
+        
+        // Desativa região crítica
+        pthread_mutex_unlock(&mutex);
     }
-    pthread_mutex_unlock(&mutex);
-    return 0;
+    
+
 }
 
-// função que imprimi o vetor de primos
-void print_vetor() {
-    printf("print vetor de primos primos\n");
-    for (int i = 0; i < indice; i++) {
-        printf("%d ", vetor_primos[i]);
+// Método que monitora e chama os teste de primos
+void *run(void *num)
+{
+
+    // Captura o tempo de inicio
+    clock_t tempo_de_inicio = clock();
+
+    // Enquanto o tempo de inicio estiver no intervalo definido
+    while ((clock() - tempo_de_inicio)/CLOCKS_PER_SEC <= tempo_de_execucao)
+    {
+
+        // Inicia região crítica
+        pthread_mutex_lock(&mutex);
+
+        // Incrementa em dois o número a ser testado para evitar pares
+        numero += 2;
+
+        // Desativa região crítica
+        pthread_mutex_unlock(&mutex); 
+
+        //Chama o método que testa os número primos
+        teste_primo(numero);    
     }
-    printf("\n");
+
+    // Finaliza a chamada das threads
+    pthread_exit(NULL);
+
+
 }
 
-// método main
-int main(int argc, char** argv) {
-    // aloca espaço do vetor de primos na memória
-    vetor_primos = (int*) malloc(sizeof (int*) * TAM);
+int main(int argc, char const *argv[])
+{
 
-    // inicia a variável de controle de região crítica
-    pthread_mutex_init(&mutex, NULL);
-
-    // cria um vetor de threads de tamanho NTHREADS
-    pthread_t threads[NTHREADS];
+    // Aloca memória para o vetor de primos
+    vetor_de_primos = (int*) malloc(sizeof(int*) * 100000000);
+    //Define o número de threads
+    int numero_de_threads = 6;
+    
     int *num;
 
-    // laço para disparar todas as threads
-    for (int i = 0; i < NTHREADS; i++) {
-        num = (int *) malloc(sizeof (int));
-        *num = i + 1;
-
-        if (pthread_create(&threads[i], NULL, calcula_primo, (void *) num)) {
-            printf("--ERRO at create thread id %d--\n", i);
+    // Crie o vetor de threads
+    pthread_t threads[numero_de_threads];
+    
+    // Inicie as threads
+    for (int i = 0; i < numero_de_threads; i++)
+    {
+        if(pthread_create(&threads[i], NULL, run, (void *) num)){
+            printf("ERROR!!! - Thread: %d.\n", i);
             return -1;
         }
+
     }
 
-    // laço para esperar o término de todas as threads
-    for (int i = 0; i < NTHREADS; i++) {
-        if (pthread_join(threads[i], NULL)) {
-            printf("--ERRO: pthread_join() \n");
+    // Desative as threads
+    for (int i = 0; i < numero_de_threads; i++)
+    {
+        if (pthread_join(threads[i], NULL))
+        {
+            printf("--Erro: pthread_join() \n");
             return -1;
         }
+        
     }
-    print_vetor();
+    
+    // Elimine o mutex
+    pthread_mutex_destroy(&mutex);
+
+    // Imprime o tempo e o número total de primos alcançados
+    printf("Tempo gasto %f. Número alcancado: %d.", tempo_de_execucao, indice_atual_vetor-1);
+    //imprime_primos();
+
     return 0;
 }
