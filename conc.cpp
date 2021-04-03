@@ -47,7 +47,7 @@
 #include <pthread.h>
 #include <iostream>
 #include <time.h>
-
+#include <cmath>    
 
 pthread_mutex_t mutex; 
 
@@ -73,7 +73,7 @@ void teste_primo(int num){
     int counter = 0;
     int teste = 1;
 
-    for (int i = 2; i < num/2+1; i++)
+    for (int i = 2; i < sqrt(num); i++)
     {
         
         if (num % i == 0)
@@ -84,13 +84,15 @@ void teste_primo(int num){
 
     }
 
-    pthread_mutex_lock(&mutex);
+
     if (teste==1)
     {
+        pthread_mutex_lock(&mutex);
         vetor_de_primos[indice_atual_vetor] = num;
         indice_atual_vetor++;
+        pthread_mutex_unlock(&mutex);
     }
-    pthread_mutex_unlock(&mutex);
+    
 
 }
 
