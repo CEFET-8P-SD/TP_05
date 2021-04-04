@@ -2,32 +2,21 @@
 #include <pthread.h>
 #include <iostream>
 #include <time.h>
-#include <cmath>    
+#include <cmath>
+#include <chrono>
 
 //Variáveis globais
 pthread_mutex_t mutex;  // Variável que será usada para controlar a região crítica
 
 int *vetor_de_primos;   
 
-float tempo_de_execucao = 5.0;  // Tempo permitido de execução
-int indice_atual_vetor = 0;     // Variável que controla o índice do vetor
-int numero = 1;                 // número a ser testado no momento atual
-
-//Método usado para testes: Imprime o vetor de primos
-void imprime_primos()
-{
-    printf("%d", vetor_de_primos[0]);
-
-    for (int i = 1; i < indice_atual_vetor; i++)
-    {
-        printf("%d     ", vetor_de_primos[i]);
-    }
-
-}
+int tamanho_vetor_primos = 100000000;       // Tempo permitido de execução
+int tempo_de_execucao = 30;                 // Tempo permitido de execução
+int indice_atual_vetor = 1;                 // Variável que controla o índice do vetor
+int numero = 1;                             // número a ser testado no momento atual
 
 //Método que testa se um dado número é ou não primo
 void teste_primo(int num){
-    int counter = 0;
     int teste = 1;
 
     // Laço de repetição que testara se um número divide por todos os números até sua raiz quadrada
@@ -56,19 +45,13 @@ void teste_primo(int num){
         // Desativa região crítica
         pthread_mutex_unlock(&mutex);
     }
-    
-
 }
 
 // Método que monitora e chama os teste de primos
 void *run(void *num)
 {
-
-    // Captura o tempo de inicio
-    clock_t tempo_de_inicio = clock();
-
     // Enquanto o tempo de inicio estiver no intervalo definido
-    while ((clock() - tempo_de_inicio)/CLOCKS_PER_SEC <= tempo_de_execucao)
+    while (true)
     {
 
         // Inicia região crítica
@@ -86,15 +69,14 @@ void *run(void *num)
 
     // Finaliza a chamada das threads
     pthread_exit(NULL);
-
-
 }
 
 int main(int argc, char const *argv[])
 {
-
     // Aloca memória para o vetor de primos
-    vetor_de_primos = (int*) malloc(sizeof(int*) * 100000000);
+    vetor_de_primos = (int*) malloc(sizeof(int*) * tamanho_vetor_primos);
+    vetor_de_primos[0] = 2;
+
     //Define o número de threads
     int numero_de_threads = 6;
     
@@ -102,6 +84,9 @@ int main(int argc, char const *argv[])
 
     // Crie o vetor de threads
     pthread_t threads[numero_de_threads];
+
+    // Captura o tempo de inicio
+    std::chrono::steady_clock::time_point tempo_de_inicio = std::chrono::steady_clock::now();
     
     // Inicie as threads
     for (int i = 0; i < numero_de_threads; i++)
@@ -113,6 +98,24 @@ int main(int argc, char const *argv[])
 
     }
 
+    // tempo de inicio
+    std::chrono::steady_clock::time_point tempo_de_fim = std::chrono::steady_clock::now();
+
+    // tempo de execucao do programa
+    while ( std::chrono::duration_cast<std::chrono::seconds>(tempo_de_fim - tempo_de_inicio).count() <= tempo_de_execucao ) {
+        tempo_de_fim = std::chrono::steady_clock::now();
+    }
+
+    // checando o fim do programa
+    if ( std::chrono::duration_cast<std::chrono::seconds>(tempo_de_fim - tempo_de_inicio) >= std::chrono::seconds{tempo_de_execucao} )
+    {
+        pthread_mutex_destroy(&mutex);
+
+        // Imprime o tempo e o número total de primos alcançados
+        printf("Tempo gasto %d. Número alcancado: %d.\n", tempo_de_execucao, indice_atual_vetor);
+        return 0;
+    }
+
     // Desative as threads
     for (int i = 0; i < numero_de_threads; i++)
     {
@@ -121,15 +124,7 @@ int main(int argc, char const *argv[])
             printf("--Erro: pthread_join() \n");
             return -1;
         }
-        
+
     }
-    
-    // Elimine o mutex
-    pthread_mutex_destroy(&mutex);
-
-    // Imprime o tempo e o número total de primos alcançados
-    printf("Tempo gasto %f. Número alcancado: %d.", tempo_de_execucao, indice_atual_vetor-1);
-    //imprime_primos();
-
     return 0;
 }
