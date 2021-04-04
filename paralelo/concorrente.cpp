@@ -50,7 +50,6 @@ void teste_primo(int num){
 // Método que monitora e chama os teste de primos
 void *run(void *num)
 {
-    // Enquanto o tempo de inicio estiver no intervalo definido
     while (true)
     {
 
