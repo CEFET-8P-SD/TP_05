@@ -6,24 +6,15 @@
 using namespace std;
 
 // Define o tamanho da vetor de primos
-#define TAM 100000000
+#define TAM 900000000
 // Tempo de execucao em segundos
-#define TEMPO_EXECUCAO 0.01
+#define TEMPO_EXECUCAO 30
 // Cria vetor para alocar os números primos
 int *vetor_primos;
 // Define variável de índice para inserir no vetor
 int indice = 1;
 // Define gerador de numeros para teste
 int num = 3;
-
-// função que imprimi o vetor de primos
-void print_vetor() {
-    printf("print vetor de primos primos\n");
-    for (int i = 0; i < indice; i++) {
-        printf("%d ", vetor_primos[i]);
-    }
-    printf("\n");
-}
 
 // função que determina se o número é primo e adiciona no
 // vetor de primos caso seja
@@ -67,7 +58,5 @@ int main(int argc, char** argv) {
 
     // chamando método para gerar os números primos
     calcula_primo();
-    // metodo para print do vetor de primos
-    // print_vetor();
 }
 
